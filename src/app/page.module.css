@@ -165,8 +165,8 @@ a.secondary {
 }
 
 .imageTitle {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 700;
   color: var(--card-strip-text);
   margin: 0;
   padding: 8px 12px;
