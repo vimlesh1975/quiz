@@ -19,21 +19,23 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1>Gallery - 10 Images</h1>
+        <h1>Gallery - All Images</h1>
         <div className={styles.gallery}>
           {images.map((image, index) => {
             const filename = image.split('/').pop();
             return (
               <div key={index} className={styles.imageContainer}>
                 <h3 className={styles.imageTitle}>{filename}</h3>
-                <Image
-                  src={image}
-                  alt={`Image ${index + 1}`}
-                  width={400}
-                  height={300}
-                  priority={index < 3}
-                />
-                <button className={styles.showButton}>Show</button>
+                <div className={styles.imageRow}>
+                  <Image
+                    src={image}
+                    alt={`Image ${index + 1}`}
+                    width={400}
+                    height={300}
+                    priority={index < 3}
+                  />
+                  <button className={styles.showButton}>Show</button>
+                </div>
               </div>
             );
           })}
