@@ -1,4 +1,5 @@
 import { Socket } from "node:net";
+import path from "node:path";
 import { isAllowedQuizImage } from "@/lib/quiz-images";
 
 export const runtime = "nodejs";
@@ -8,6 +9,8 @@ const DEFAULT_HOST = process.env.CASPARCG_HOST || "127.0.0.1";
 const DEFAULT_PORT = Number(process.env.CASPARCG_PORT || "5250");
 const DEFAULT_CHANNEL = Number(process.env.CASPARCG_CHANNEL || "1");
 const DEFAULT_LAYER = Number(process.env.CASPARCG_LAYER || "10");
+const DEFAULT_SCORE_HTML_LAYER = Number(process.env.CASPARCG_SCORE_HTML_LAYER || "20");
+const DEFAULT_SCORE_OVERLAY_LAYER = Number(process.env.CASPARCG_SCORE_OVERLAY_LAYER || "11");
 
 function parsePositiveNumber(value, fallback) {
   const parsed = Number(value);
@@ -23,6 +26,17 @@ function getRenderBaseUrl(request) {
 
   const requestUrl = new URL(request.url);
   return requestUrl.origin;
+}
+
+function buildAssetUrl(assetPath, renderBaseUrl) {
+  const isHtmlAsset = [".html", ".htm"].includes(path.extname(assetPath).toLowerCase());
+
+  return isHtmlAsset
+    ? new URL(assetPath, renderBaseUrl).toString()
+    : new URL(
+        `/api/casparcg/still?image=${encodeURIComponent(assetPath)}`,
+        renderBaseUrl
+      ).toString();
 }
 
 function sendAmcpCommand(command, host, port) {
@@ -87,6 +101,7 @@ export async function POST(request) {
   }
 
   const imagePath = body?.imagePath;
+  const overlayPath = body?.overlayPath;
 
   if (!imagePath || !isAllowedQuizImage(imagePath)) {
     return Response.json(
@@ -95,35 +110,55 @@ export async function POST(request) {
     );
   }
 
+  if (overlayPath && !isAllowedQuizImage(overlayPath)) {
+    return Response.json(
+      { error: "overlayPath must match one of the allowed assets in /public." },
+      { status: 400 }
+    );
+  }
+
   const channel = parsePositiveNumber(body?.channel, DEFAULT_CHANNEL);
-  const layer = parsePositiveNumber(body?.layer, DEFAULT_LAYER);
+  const isHtmlAsset = [".html", ".htm"].includes(path.extname(imagePath).toLowerCase());
+  const defaultLayer = isHtmlAsset ? DEFAULT_SCORE_HTML_LAYER : DEFAULT_LAYER;
+  const layer = parsePositiveNumber(body?.layer, defaultLayer);
   const renderBaseUrl = getRenderBaseUrl(request);
-  const imageUrl = new URL(
-    `/api/casparcg/still?image=${encodeURIComponent(imagePath)}`,
-    renderBaseUrl
-  ).toString();
-  const command = `PLAY ${channel}-${layer} [HTML] "${imageUrl}"`;
+  const assetUrl = buildAssetUrl(imagePath, renderBaseUrl);
+  const commands = [`PLAY ${channel}-${layer} [HTML] "${assetUrl}"`];
+
+  if (overlayPath) {
+    const overlayLayer = parsePositiveNumber(
+      body?.overlayLayer,
+      DEFAULT_SCORE_OVERLAY_LAYER
+    );
+    const overlayUrl = buildAssetUrl(overlayPath, renderBaseUrl);
+    commands.push(`PLAY ${channel}-${overlayLayer} [HTML] "${overlayUrl}"`);
+  }
 
   try {
-    const casparcgResponse = await sendAmcpCommand(
-      command,
-      DEFAULT_HOST,
-      DEFAULT_PORT
-    );
+    const casparcgResponses = [];
+
+    for (const command of commands) {
+      const casparcgResponse = await sendAmcpCommand(
+        command,
+        DEFAULT_HOST,
+        DEFAULT_PORT
+      );
+      casparcgResponses.push(casparcgResponse);
+    }
 
     return Response.json({
       ok: true,
       imagePath,
-      imageUrl,
-      command,
-      casparcgResponse,
+      imageUrl: assetUrl,
+      commands,
+      casparcgResponses,
     });
   } catch (error) {
     return Response.json(
       {
         error: "Failed to send command to CasparCG.",
         details: error.message,
-        command,
+        commands,
       },
       { status: 502 }
     );

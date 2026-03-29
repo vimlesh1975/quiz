@@ -207,6 +207,12 @@ a.secondary {
   color: var(--card-strip-text);
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .refreshButton {
   padding: 10px 18px;
   background-color: #111827;
@@ -228,6 +234,27 @@ a.secondary {
   opacity: 0.75;
 }
 
+.stopButton {
+  padding: 10px 18px;
+  background-color: #b91c1c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.stopButton:hover {
+  background-color: #991b1b;
+}
+
+.stopButton:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
 .imageContainer {
   display: flex;
   flex-direction: column;
@@ -235,6 +262,12 @@ a.secondary {
   align-items: flex-start;
   gap: 8px;
   margin-bottom: 24px;
+}
+
+.imageTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .imageTitle {
@@ -262,6 +295,36 @@ a.secondary {
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 3px solid #0070f3;
+}
+
+.htmlPreview {
+  width: 400px;
+  min-height: 225px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: 8px;
+  border: 3px solid #f59e0b;
+  background: linear-gradient(135deg, #fff7d6, #ffe8a3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 24px;
+}
+
+.htmlPreviewLabel {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #92400e;
+}
+
+.htmlPreviewName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #78350f;
+  overflow-wrap: anywhere;
 }
 
 .showButton {
@@ -314,9 +377,19 @@ a.secondary {
     align-items: flex-start;
   }
 
+  .headerActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
   .imageRow {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .imageTitleRow {
+    width: 100%;
+    flex-wrap: wrap;
   }
 
   .imageTitle {

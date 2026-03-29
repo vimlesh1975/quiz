@@ -19,6 +19,7 @@ export default async function Home() {
               title="Gallery - All Images"
               images={quizImages}
               refreshLabel="Refresh Gallery"
+              stopLayers={[10, 11]}
             />
           </div>
           <div className={styles.scrollColumn}>
@@ -26,6 +27,9 @@ export default async function Home() {
               title="Score - All Images"
               images={scoreImages}
               refreshLabel="Refresh Scores"
+              overlayPath="/IT score html/score-200.html"
+              overlayLayer={11}
+              stopLayers={[10, 11]}
             />
           </div>
         </div>
