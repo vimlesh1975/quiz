@@ -1,6 +1,6 @@
 import { Socket } from "node:net";
 import path from "node:path";
-import { isAllowedQuizImage } from "@/lib/quiz-images";
+import { getAssetAbsolutePath, isAllowedAsset } from "@/lib/quiz-images";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +9,7 @@ const DEFAULT_HOST = process.env.CASPARCG_HOST || "127.0.0.1";
 const DEFAULT_PORT = Number(process.env.CASPARCG_PORT || "5250");
 const DEFAULT_CHANNEL = Number(process.env.CASPARCG_CHANNEL || "1");
 const DEFAULT_LAYER = Number(process.env.CASPARCG_LAYER || "10");
+const DEFAULT_VIDEO_LAYER = Number(process.env.CASPARCG_VIDEO_LAYER || "10");
 const DEFAULT_SCORE_HTML_LAYER = Number(process.env.CASPARCG_SCORE_HTML_LAYER || "20");
 const DEFAULT_SCORE_OVERLAY_LAYER = Number(process.env.CASPARCG_SCORE_OVERLAY_LAYER || "11");
 
@@ -29,14 +30,32 @@ function getRenderBaseUrl(request) {
 }
 
 function buildAssetUrl(assetPath, renderBaseUrl) {
-  const isHtmlAsset = [".html", ".htm"].includes(path.extname(assetPath).toLowerCase());
+  const extension = path.extname(assetPath).toLowerCase();
+  const isHtmlAsset = [".html", ".htm"].includes(extension);
+  const isVideoAsset = [".mp4", ".mov", ".webm"].includes(extension);
 
   return isHtmlAsset
     ? new URL(assetPath, renderBaseUrl).toString()
+    : isVideoAsset
+      ? new URL(
+          `/api/casparcg/video?src=${encodeURIComponent(assetPath)}`,
+          renderBaseUrl
+        ).toString()
     : new URL(
         `/api/casparcg/still?image=${encodeURIComponent(assetPath)}`,
         renderBaseUrl
       ).toString();
+}
+
+function buildVideoCommand(channel, layer, assetPath) {
+  const absoluteAssetPath = getAssetAbsolutePath(assetPath);
+
+  if (!absoluteAssetPath) {
+    throw new Error("Could not resolve local video path.");
+  }
+
+  const casparPath = absoluteAssetPath.replaceAll("\\", "/").replace(":/", "://");
+  return `PLAY ${channel}-${layer} "${casparPath}" LOOP`;
 }
 
 function sendAmcpCommand(command, host, port) {
@@ -109,14 +128,14 @@ export async function POST(request) {
       : null;
   const overlayType = typeof body?.overlayType === "string" ? body.overlayType : "";
 
-  if (!imagePath || !isAllowedQuizImage(imagePath)) {
+  if (!imagePath || !isAllowedAsset(imagePath)) {
     return Response.json(
-      { error: "imagePath must match one of the quiz images in /public." },
+      { error: "imagePath must match one of the allowed assets in /public." },
       { status: 400 }
     );
   }
 
-  if (overlayPath && !isAllowedQuizImage(overlayPath)) {
+  if (overlayPath && !isAllowedAsset(overlayPath)) {
     return Response.json(
       { error: "overlayPath must match one of the allowed assets in /public." },
       { status: 400 }
@@ -124,12 +143,24 @@ export async function POST(request) {
   }
 
   const channel = parsePositiveNumber(body?.channel, DEFAULT_CHANNEL);
-  const isHtmlAsset = [".html", ".htm"].includes(path.extname(imagePath).toLowerCase());
-  const defaultLayer = isHtmlAsset ? DEFAULT_SCORE_HTML_LAYER : DEFAULT_LAYER;
+  const imageExtension = path.extname(imagePath).toLowerCase();
+  const isHtmlAsset = [".html", ".htm"].includes(imageExtension);
+  const isVideoAsset = [".mp4", ".mov", ".webm"].includes(imageExtension);
+  const defaultLayer = isHtmlAsset
+    ? DEFAULT_SCORE_HTML_LAYER
+    : isVideoAsset
+      ? DEFAULT_VIDEO_LAYER
+      : DEFAULT_LAYER;
   const layer = parsePositiveNumber(body?.layer, defaultLayer);
   const renderBaseUrl = getRenderBaseUrl(request);
-  const assetUrl = buildAssetUrl(imagePath, renderBaseUrl);
-  const commands = [`PLAY ${channel}-${layer} [HTML] "${assetUrl}"`];
+  const assetUrl = isVideoAsset
+    ? getAssetAbsolutePath(imagePath)?.replaceAll("\\", "/").replace(":/", "://")
+    : buildAssetUrl(imagePath, renderBaseUrl);
+  const commands = [
+    isVideoAsset
+      ? buildVideoCommand(channel, layer, imagePath)
+      : `PLAY ${channel}-${layer} [HTML] "${assetUrl}"`,
+  ];
 
   if (overlayPath) {
     const overlayLayer = parsePositiveNumber(

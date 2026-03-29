@@ -13,10 +13,10 @@ function escapeHtml(value) {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const imagePath = searchParams.get("image");
+  const src = searchParams.get("src");
 
-  if (!imagePath || !isAllowedAsset(imagePath)) {
-    return new Response("Image not found.", {
+  if (!src || !isAllowedAsset(src)) {
+    return new Response("Video not found.", {
       status: 404,
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
@@ -24,8 +24,8 @@ export async function GET(request) {
     });
   }
 
-  const escapedImageUrl = escapeHtml(imagePath);
-  const escapedTitle = escapeHtml(imagePath.split("/").pop() || "Quiz image");
+  const escapedSrc = escapeHtml(src);
+  const escapedTitle = escapeHtml(src.split("/").pop() || "Video");
 
   return new Response(
     `<!doctype html>
@@ -36,9 +36,9 @@ export async function GET(request) {
     <title>${escapedTitle}</title>
     <style>
       html, body {
-        margin: 0;
         width: 100%;
         height: 100%;
+        margin: 0;
         overflow: hidden;
         background: #000;
       }
@@ -48,18 +48,18 @@ export async function GET(request) {
         place-items: center;
       }
 
-      img {
-        max-width: 100vw;
-        max-height: 100vh;
-        width: auto;
-        height: auto;
+      video {
+        width: 100vw;
+        height: 100vh;
         object-fit: contain;
-        display: block;
+        background: #000;
       }
     </style>
   </head>
   <body>
-    <img src="${escapedImageUrl}" alt="${escapedTitle}" />
+    <video autoplay muted loop playsinline>
+      <source src="${escapedSrc}" />
+    </video>
   </body>
 </html>`,
     {

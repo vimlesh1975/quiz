@@ -1,13 +1,14 @@
 import GalleryClient from "./components/gallery-client";
 import styles from "./page.module.css";
-import { getQuizImages, getScoreImages } from "@/lib/quiz-images";
+import { getQuizImages, getScoreImages, getVideoAssets } from "@/lib/quiz-images";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [quizImages, scoreImages] = await Promise.all([
+  const [quizImages, scoreImages, videoAssets] = await Promise.all([
     getQuizImages(),
     getScoreImages(),
+    getVideoAssets(),
   ]);
   const scoreOverlayConfigByImage = {
     "/IT samples score/Score board team 01.jpg": {
@@ -66,6 +67,14 @@ export default async function Home() {
               refreshLabel="Refresh Scores"
               stopLayers={[10, 11]}
               overlayConfigByImage={scoreOverlayConfigByImage}
+            />
+          </div>
+          <div className={styles.scrollColumn}>
+            <GalleryClient
+              title="Video - All Files"
+              images={videoAssets}
+              refreshLabel="Refresh Videos"
+              stopLayers={[10, 11]}
             />
           </div>
         </div>

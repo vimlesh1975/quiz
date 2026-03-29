@@ -144,6 +144,22 @@ export default function GalleryClient({
       );
     }
 
+    if (
+      image.endsWith(".mp4") ||
+      image.endsWith(".mov") ||
+      image.endsWith(".webm")
+    ) {
+      return (
+        <video
+          className={styles.videoPreview}
+          src={image}
+          muted
+          playsInline
+          preload="metadata"
+        />
+      );
+    }
+
     return (
       <Image
         src={image}

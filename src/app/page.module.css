@@ -297,6 +297,15 @@ a.secondary {
   border: 3px solid #0070f3;
 }
 
+.videoPreview {
+  width: 400px;
+  height: 225px;
+  border-radius: 8px;
+  border: 3px solid #0ea5e9;
+  background: #000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .htmlPreview {
   width: 400px;
   min-height: 225px;
