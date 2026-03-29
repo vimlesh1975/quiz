@@ -1,49 +1,23 @@
 'use client'
 
-import { useState, useTransition } from "react";
 import styles from "../page.module.css";
 
-export default function CasparShowButton({ imagePath }) {
-  const [message, setMessage] = useState("");
-  const [isPending, startTransition] = useTransition();
-
-  function handleClick() {
-    startTransition(async () => {
-      setMessage("");
-
-      try {
-        const response = await fetch("/api/casparcg/play", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            imagePath,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || "Failed to play image in CasparCG.");
-        }
-
-        setMessage("Playing in CasparCG");
-      } catch (error) {
-        setMessage(error.message);
-      }
-    });
-  }
-
+export default function CasparShowButton({
+  imagePath,
+  isActive,
+  isPending,
+  message,
+  onPlay,
+}) {
   return (
     <div className={styles.buttonGroup}>
       <button
         type="button"
-        className={styles.showButton}
-        onClick={handleClick}
+        className={`${styles.showButton} ${isActive ? styles.showButtonActive : ""}`}
+        onClick={() => onPlay(imagePath)}
         disabled={isPending}
       >
-        {isPending ? "Sending..." : "Show"}
+        {isPending ? "Sending..." : isActive ? "Playing" : "Show"}
       </button>
       {message ? <p className={styles.buttonMessage}>{message}</p> : null}
     </div>

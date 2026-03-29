@@ -213,6 +213,14 @@ a.secondary {
   background-color: #0051cc;
 }
 
+.showButtonActive {
+  background-color: #118a36;
+}
+
+.showButtonActive:hover {
+  background-color: #0d722c;
+}
+
 .buttonGroup {
   display: flex;
   flex-direction: column;
