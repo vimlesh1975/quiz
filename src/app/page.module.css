@@ -188,6 +188,15 @@ a.secondary {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 12px 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--card-strip-border);
+  background-color: var(--card-strip-background);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .galleryHeading {
@@ -195,7 +204,7 @@ a.secondary {
   margin: 0;
   padding: 0;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--card-strip-text);
 }
 
 .refreshButton {
