@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import CasparShowButton from "./caspar-show-button";
 import styles from "../page.module.css";
 
-export default function GalleryClient({ images }) {
+export default function GalleryClient({ title, images, refreshLabel }) {
   const router = useRouter();
   const [activeImagePath, setActiveImagePath] = useState(null);
   const [statusImagePath, setStatusImagePath] = useState(null);
@@ -54,16 +54,16 @@ export default function GalleryClient({ images }) {
   }
 
   return (
-    <>
+    <section className={styles.gallerySection}>
       <div className={styles.galleryHeader}>
-        <h1 className={styles.galleryHeading}>Gallery - All Images</h1>
+        <h1 className={styles.galleryHeading}>{title}</h1>
         <button
           type="button"
           className={styles.refreshButton}
           onClick={handleRefresh}
           disabled={isRefreshing}
         >
-          {isRefreshing ? "Refreshing..." : "Refresh Images"}
+          {isRefreshing ? "Refreshing..." : refreshLabel}
         </button>
       </div>
       <div className={styles.gallery}>
@@ -93,6 +93,6 @@ export default function GalleryClient({ images }) {
           );
         })}
       </div>
-    </>
+    </section>
   );
 }

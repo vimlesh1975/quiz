@@ -23,16 +23,33 @@
 
 .main {
   display: flex;
-  width: fit-content;
+  width: max-content;
   max-width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   background-color: var(--foreground);
   padding: 20px 20px;
-  height: 900px;
-  overflow-y: scroll;
+  overflow: hidden;
   margin-left: 40px;
+}
+
+.galleryColumns {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.gallerySection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.scrollColumn {
+  height: 860px;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .intro {
@@ -115,6 +132,17 @@ a.secondary {
 @media (max-width: 600px) {
   .main {
     padding: 48px 24px;
+  }
+
+  .galleryColumns {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .scrollColumn {
+    height: auto;
+    overflow-y: visible;
+    padding-right: 0;
   }
 
   .intro {
