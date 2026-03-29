@@ -8,9 +8,28 @@ export default function CasparShowButton({
   isPending,
   message,
   onPlay,
+  scoreInputs,
+  onScoreChange,
 }) {
   return (
     <div className={styles.buttonGroup}>
+      {Array.isArray(scoreInputs) && scoreInputs.length > 0 ? (
+        <div className={styles.scoreInputsGroup}>
+          {scoreInputs.map((input) => (
+            <label key={input.key} className={styles.scoreInputLabel}>
+              <span>{input.label}</span>
+              <input
+                type="text"
+                className={styles.scoreInput}
+                value={input.value}
+                onChange={(event) =>
+                  onScoreChange?.(imagePath, input.key, event.target.value)
+                }
+              />
+            </label>
+          ))}
+        </div>
+      ) : null}
       <button
         type="button"
         className={`${styles.showButton} ${isActive ? styles.showButtonActive : ""}`}

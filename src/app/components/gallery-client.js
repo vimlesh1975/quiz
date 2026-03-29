@@ -10,9 +10,8 @@ export default function GalleryClient({
   title,
   images,
   refreshLabel,
-  overlayPath,
-  overlayLayer,
   stopLayers,
+  overlayConfigByImage,
 }) {
   const router = useRouter();
   const [activeImagePath, setActiveImagePath] = useState(null);
@@ -21,20 +20,60 @@ export default function GalleryClient({
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [isStopping, startStopTransition] = useTransition();
+  const [scoreValues, setScoreValues] = useState(() =>
+    createScoreValues(images, overlayConfigByImage)
+  );
+
+  function createRandomScore() {
+    return String(180 + Math.floor(Math.random() * 41));
+  }
+
+  function createScoreValues(nextImages, nextOverlayConfigByImage) {
+    return Object.fromEntries(
+      nextImages.map((image) => {
+        const overlayConfig = nextOverlayConfigByImage?.[image];
+
+        if (!overlayConfig?.inputs?.length) {
+          return [image, {}];
+        }
+
+        return [
+          image,
+          Object.fromEntries(
+            overlayConfig.inputs.map((input) => [input.key, createRandomScore()])
+          ),
+        ];
+      })
+    );
+  }
 
   function handleRefresh() {
     startRefreshTransition(() => {
       setActiveImagePath(null);
       setStatusImagePath(null);
       setStatusMessage("");
+      setScoreValues(createScoreValues(images, overlayConfigByImage));
       router.refresh();
     });
+  }
+
+  function handleScoreChange(imagePath, inputKey, value) {
+    setScoreValues((currentValues) => ({
+      ...currentValues,
+      [imagePath]: {
+        ...currentValues[imagePath],
+        [inputKey]: value,
+      },
+    }));
   }
 
   function handlePlay(imagePath) {
     startTransition(async () => {
       setStatusImagePath(imagePath);
       setStatusMessage("");
+
+      const overlayConfig = overlayConfigByImage?.[imagePath];
+      const overlayValues = scoreValues[imagePath] || {};
 
       try {
         const response = await fetch("/api/casparcg/play", {
@@ -44,8 +83,11 @@ export default function GalleryClient({
           },
           body: JSON.stringify({
             imagePath,
-            overlayPath,
-            overlayLayer,
+            overlayPath: overlayConfig?.overlayPath,
+            overlayLayer: overlayConfig?.overlayLayer,
+            overlayValue: overlayConfig?.mode === "single" ? overlayValues.value ?? "" : undefined,
+            overlayValues: overlayConfig?.mode === "team" ? overlayValues : undefined,
+            overlayType: overlayConfig?.mode,
           }),
         });
 
@@ -155,6 +197,11 @@ export default function GalleryClient({
                   isPending={isPending && statusImagePath === image}
                   message={statusImagePath === image ? statusMessage : ""}
                   onPlay={handlePlay}
+                  scoreInputs={overlayConfigByImage?.[image]?.inputs?.map((input) => ({
+                    ...input,
+                    value: scoreValues[image]?.[input.key] ?? "",
+                  }))}
+                  onScoreChange={handleScoreChange}
                 />
               </div>
             </div>

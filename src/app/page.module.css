@@ -364,6 +364,44 @@ a.secondary {
   gap: 8px;
 }
 
+.scoreInputsGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--card-strip-border);
+  border-radius: 8px;
+  background-color: var(--card-strip-background);
+}
+
+.scoreInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--card-strip-text);
+}
+
+.scoreInputLabel span {
+  color: var(--card-strip-text);
+}
+
+.scoreInput {
+  width: 92px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  -webkit-text-fill-color: #111827;
+  caret-color: #111827;
+  background-color: #ffffff;
+  opacity: 1;
+  text-align: center;
+}
+
 .buttonMessage {
   max-width: 180px;
   font-size: 12px;

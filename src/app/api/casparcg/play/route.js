@@ -102,6 +102,12 @@ export async function POST(request) {
 
   const imagePath = body?.imagePath;
   const overlayPath = body?.overlayPath;
+  const overlayValue = typeof body?.overlayValue === "string" ? body.overlayValue : "";
+  const overlayValues =
+    body?.overlayValues && typeof body.overlayValues === "object"
+      ? body.overlayValues
+      : null;
+  const overlayType = typeof body?.overlayType === "string" ? body.overlayType : "";
 
   if (!imagePath || !isAllowedQuizImage(imagePath)) {
     return Response.json(
@@ -130,7 +136,26 @@ export async function POST(request) {
       body?.overlayLayer,
       DEFAULT_SCORE_OVERLAY_LAYER
     );
-    const overlayUrl = buildAssetUrl(overlayPath, renderBaseUrl);
+    const overlayUrl =
+      overlayType === "team" && overlayPath === "/IT score html/team-scores.html"
+        ? new URL(
+            `/api/casparcg/team-score-overlay?team1=${encodeURIComponent(
+              String(overlayValues?.team1 ?? "000")
+            )}&team2=${encodeURIComponent(
+              String(overlayValues?.team2 ?? "000")
+            )}&team3=${encodeURIComponent(
+              String(overlayValues?.team3 ?? "000")
+            )}&team4=${encodeURIComponent(
+              String(overlayValues?.team4 ?? "000")
+            )}`,
+            renderBaseUrl
+          ).toString()
+        : overlayValue && overlayPath === "/IT score html/score-200.html"
+        ? new URL(
+            `/api/casparcg/score-overlay?value=${encodeURIComponent(overlayValue)}`,
+            renderBaseUrl
+          ).toString()
+        : buildAssetUrl(overlayPath, renderBaseUrl);
     commands.push(`PLAY ${channel}-${overlayLayer} [HTML] "${overlayUrl}"`);
   }
 
