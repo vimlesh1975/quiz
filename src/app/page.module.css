@@ -23,8 +23,8 @@
 
 .main {
   display: flex;
-  width: 100%;
-  max-width: 800px;
+  width: fit-content;
+  max-width: 100%;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
@@ -204,8 +204,27 @@ a.secondary {
   align-self: center;
 }
 
+.showButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
 .showButton:hover {
   background-color: #0051cc;
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.buttonMessage {
+  max-width: 180px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 600px) {
