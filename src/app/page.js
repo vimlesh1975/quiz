@@ -1,12 +1,15 @@
 import GalleryClient from "./components/gallery-client";
 import styles from "./page.module.css";
-import { quizImages } from "@/lib/quiz-images";
+import { getQuizImages } from "@/lib/quiz-images";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const quizImages = await getQuizImages();
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1>Gallery - All Images</h1>
         <GalleryClient images={quizImages} />
       </main>
     </div>

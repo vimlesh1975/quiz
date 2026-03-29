@@ -2,14 +2,26 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import CasparShowButton from "./caspar-show-button";
 import styles from "../page.module.css";
 
 export default function GalleryClient({ images }) {
+  const router = useRouter();
   const [activeImagePath, setActiveImagePath] = useState(null);
   const [statusImagePath, setStatusImagePath] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [isRefreshing, startRefreshTransition] = useTransition();
+
+  function handleRefresh() {
+    startRefreshTransition(() => {
+      setActiveImagePath(null);
+      setStatusImagePath(null);
+      setStatusMessage("");
+      router.refresh();
+    });
+  }
 
   function handlePlay(imagePath) {
     startTransition(async () => {
@@ -42,32 +54,45 @@ export default function GalleryClient({ images }) {
   }
 
   return (
-    <div className={styles.gallery}>
-      {images.map((image, index) => {
-        const filename = image.split("/").pop();
+    <>
+      <div className={styles.galleryHeader}>
+        <h1 className={styles.galleryHeading}>Gallery - All Images</h1>
+        <button
+          type="button"
+          className={styles.refreshButton}
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          {isRefreshing ? "Refreshing..." : "Refresh Images"}
+        </button>
+      </div>
+      <div className={styles.gallery}>
+        {images.map((image, index) => {
+          const filename = image.split("/").pop();
 
-        return (
-          <div key={image} className={styles.imageContainer}>
-            <h3 className={styles.imageTitle}>{filename}</h3>
-            <div className={styles.imageRow}>
-              <Image
-                src={image}
-                alt={`Image ${index + 1}`}
-                width={400}
-                height={300}
-                priority={index < 3}
-              />
-              <CasparShowButton
-                imagePath={image}
-                isActive={activeImagePath === image}
-                isPending={isPending && statusImagePath === image}
-                message={statusImagePath === image ? statusMessage : ""}
-                onPlay={handlePlay}
-              />
+          return (
+            <div key={image} className={styles.imageContainer}>
+              <h3 className={styles.imageTitle}>{filename}</h3>
+              <div className={styles.imageRow}>
+                <Image
+                  src={image}
+                  alt={`Image ${index + 1}`}
+                  width={400}
+                  height={300}
+                  priority={index < 3}
+                />
+                <CasparShowButton
+                  imagePath={image}
+                  isActive={activeImagePath === image}
+                  isPending={isPending && statusImagePath === image}
+                  message={statusImagePath === image ? statusMessage : ""}
+                  onPlay={handlePlay}
+                />
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
