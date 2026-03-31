@@ -11,9 +11,10 @@ export default function GalleryClient({
   images,
   refreshLabel,
   overlayConfigByImage,
+  activeImagePath,
+  onActiveImageChange,
 }) {
   const router = useRouter();
-  const [activeImagePath, setActiveImagePath] = useState(null);
   const [statusImagePath, setStatusImagePath] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -47,7 +48,6 @@ export default function GalleryClient({
 
   function handleRefresh() {
     startRefreshTransition(() => {
-      setActiveImagePath(null);
       setStatusImagePath(null);
       setStatusMessage("");
       setScoreValues(createScoreValues(images, overlayConfigByImage));
@@ -95,7 +95,7 @@ export default function GalleryClient({
           throw new Error(result.error || "Failed to play image in CasparCG.");
         }
 
-        setActiveImagePath(imagePath);
+        onActiveImageChange?.(imagePath);
         setStatusMessage("Playing in CasparCG");
       } catch (error) {
         setStatusMessage(error.message);

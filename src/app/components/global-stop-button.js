@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import styles from "../page.module.css";
 
-export default function GlobalStopButton({ layers }) {
+export default function GlobalStopButton({ layers, onStopped }) {
   const [message, setMessage] = useState("");
   const [isStopping, startTransition] = useTransition();
 
@@ -26,6 +26,7 @@ export default function GlobalStopButton({ layers }) {
           throw new Error(result.error || "Failed to stop CasparCG layers.");
         }
 
+        onStopped?.();
         setMessage("Layers stopped");
       } catch (error) {
         setMessage(error.message);
