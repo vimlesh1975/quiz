@@ -49,6 +49,7 @@ export default function DashboardClient({
             onActiveImageChange={setActiveImagePath}
             stopLayersOnPlay={[11]}
             showLoopToggle
+            showChannel2Toggle
           />
         </div>
       </div>

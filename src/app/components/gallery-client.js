@@ -15,6 +15,7 @@ export default function GalleryClient({
   onActiveImageChange,
   stopLayersOnPlay,
   showLoopToggle,
+  showChannel2Toggle,
 }) {
   const router = useRouter();
   const [statusImagePath, setStatusImagePath] = useState(null);
@@ -22,6 +23,7 @@ export default function GalleryClient({
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, startRefreshTransition] = useTransition();
   const [shouldLoop, setShouldLoop] = useState(true);
+  const [useChannel2, setUseChannel2] = useState(false);
   const [scoreValues, setScoreValues] = useState(() =>
     createScoreValues(images, overlayConfigByImage)
   );
@@ -84,6 +86,7 @@ export default function GalleryClient({
           },
           body: JSON.stringify({
             imagePath,
+            channel: useChannel2 ? 2 : undefined,
             stopLayers: stopLayersOnPlay,
             shouldLoop,
             overlayPath: overlayConfig?.overlayPath,
@@ -159,6 +162,16 @@ export default function GalleryClient({
                 onChange={(event) => setShouldLoop(event.target.checked)}
               />
               <span>Loop</span>
+            </label>
+          ) : null}
+          {showChannel2Toggle ? (
+            <label className={styles.loopToggle}>
+              <input
+                type="checkbox"
+                checked={useChannel2}
+                onChange={(event) => setUseChannel2(event.target.checked)}
+              />
+              <span>ch2</span>
             </label>
           ) : null}
           <button
