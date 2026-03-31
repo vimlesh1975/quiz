@@ -12,6 +12,9 @@ const DEFAULT_LAYER = Number(process.env.CASPARCG_LAYER || "10");
 const DEFAULT_VIDEO_LAYER = Number(process.env.CASPARCG_VIDEO_LAYER || "10");
 const DEFAULT_SCORE_HTML_LAYER = Number(process.env.CASPARCG_SCORE_HTML_LAYER || "20");
 const DEFAULT_SCORE_OVERLAY_LAYER = Number(process.env.CASPARCG_SCORE_OVERLAY_LAYER || "11");
+const DEFAULT_SCORE_OVERLAY_DELAY_MS = Number(
+  process.env.CASPARCG_SCORE_OVERLAY_DELAY_MS || "400"
+);
 
 function parsePositiveNumber(value, fallback) {
   const parsed = Number(value);
@@ -107,6 +110,10 @@ function sendAmcpCommand(command, host, port) {
   });
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function POST(request) {
   let body;
 
@@ -128,6 +135,10 @@ export async function POST(request) {
       : null;
   const overlayType = typeof body?.overlayType === "string" ? body.overlayType : "";
   const stopLayers = Array.isArray(body?.stopLayers) ? body.stopLayers : [];
+  const overlayDelayMs = parsePositiveNumber(
+    body?.overlayDelayMs,
+    DEFAULT_SCORE_OVERLAY_DELAY_MS
+  );
 
   if (!imagePath || !isAllowedAsset(imagePath)) {
     return Response.json(
@@ -199,13 +210,20 @@ export async function POST(request) {
   try {
     const casparcgResponses = [];
 
-    for (const command of commands) {
+    const overlayCommandIndex = overlayPath ? commands.length - 1 : -1;
+
+    for (let index = 0; index < commands.length; index += 1) {
+      const command = commands[index];
       const casparcgResponse = await sendAmcpCommand(
         command,
         DEFAULT_HOST,
         DEFAULT_PORT
       );
       casparcgResponses.push(casparcgResponse);
+
+      if (overlayCommandIndex > 0 && index === overlayCommandIndex - 1) {
+        await sleep(overlayDelayMs);
+      }
     }
 
     return Response.json({

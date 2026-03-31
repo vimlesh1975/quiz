@@ -85,6 +85,7 @@ export default function GalleryClient({
             stopLayers: stopLayersOnPlay,
             overlayPath: overlayConfig?.overlayPath,
             overlayLayer: overlayConfig?.overlayLayer,
+            overlayDelayMs: overlayConfig?.overlayDelayMs,
             overlayValue: overlayConfig?.mode === "single" ? overlayValues.value ?? "" : undefined,
             overlayValues: overlayConfig?.mode === "team" ? overlayValues : undefined,
             overlayType: overlayConfig?.mode,
