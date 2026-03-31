@@ -14,12 +14,14 @@ export default function GalleryClient({
   activeImagePath,
   onActiveImageChange,
   stopLayersOnPlay,
+  showLoopToggle,
 }) {
   const router = useRouter();
   const [statusImagePath, setStatusImagePath] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, startRefreshTransition] = useTransition();
+  const [shouldLoop, setShouldLoop] = useState(true);
   const [scoreValues, setScoreValues] = useState(() =>
     createScoreValues(images, overlayConfigByImage)
   );
@@ -83,6 +85,7 @@ export default function GalleryClient({
           body: JSON.stringify({
             imagePath,
             stopLayers: stopLayersOnPlay,
+            shouldLoop,
             overlayPath: overlayConfig?.overlayPath,
             overlayLayer: overlayConfig?.overlayLayer,
             overlayDelayMs: overlayConfig?.overlayDelayMs,
@@ -148,6 +151,16 @@ export default function GalleryClient({
       <div className={styles.galleryHeader}>
         <h1 className={styles.galleryHeading}>{title}</h1>
         <div className={styles.headerActions}>
+          {showLoopToggle ? (
+            <label className={styles.loopToggle}>
+              <input
+                type="checkbox"
+                checked={shouldLoop}
+                onChange={(event) => setShouldLoop(event.target.checked)}
+              />
+              <span>Loop</span>
+            </label>
+          ) : null}
           <button
             type="button"
             className={styles.refreshButton}

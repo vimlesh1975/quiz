@@ -36,15 +36,20 @@ export default function GlobalStopButton({ layers, onStopped }) {
 
   return (
     <div className={styles.topBar}>
-      <button
-        type="button"
-        className={styles.stopButton}
-        onClick={handleStop}
-        disabled={isStopping}
-      >
-        {isStopping ? "Stopping..." : "Stop"}
-      </button>
-      {message ? <p className={styles.topBarMessage}>{message}</p> : null}
+      <div className={styles.topBarSide}>
+        {message ? <p className={styles.topBarMessage}>{message}</p> : null}
+      </div>
+      <h1 className={styles.topBarTitle}>DD Chennai Quiz Graphics</h1>
+      <div className={styles.topBarSideRight}>
+        <button
+          type="button"
+          className={styles.stopButton}
+          onClick={handleStop}
+          disabled={isStopping}
+        >
+          {isStopping ? "Stopping..." : "Stop"}
+        </button>
+      </div>
     </div>
   );
 }

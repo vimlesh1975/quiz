@@ -50,7 +50,7 @@ function buildAssetUrl(assetPath, renderBaseUrl) {
       ).toString();
 }
 
-function buildVideoCommand(channel, layer, assetPath) {
+function buildVideoCommand(channel, layer, assetPath, shouldLoop) {
   const absoluteAssetPath = getAssetAbsolutePath(assetPath);
 
   if (!absoluteAssetPath) {
@@ -58,7 +58,7 @@ function buildVideoCommand(channel, layer, assetPath) {
   }
 
   const casparPath = absoluteAssetPath.replaceAll("\\", "/").replace(":/", "://");
-  return `PLAY ${channel}-${layer} "${casparPath}" LOOP`;
+  return `PLAY ${channel}-${layer} "${casparPath}"${shouldLoop ? " LOOP" : ""}`;
 }
 
 function sendAmcpCommand(command, host, port) {
@@ -135,6 +135,7 @@ export async function POST(request) {
       : null;
   const overlayType = typeof body?.overlayType === "string" ? body.overlayType : "";
   const stopLayers = Array.isArray(body?.stopLayers) ? body.stopLayers : [];
+  const shouldLoop = body?.shouldLoop !== false;
   const overlayDelayMs = parsePositiveNumber(
     body?.overlayDelayMs,
     DEFAULT_SCORE_OVERLAY_DELAY_MS
@@ -175,7 +176,7 @@ export async function POST(request) {
 
   commands.push(
     isVideoAsset
-      ? buildVideoCommand(channel, layer, imagePath)
+      ? buildVideoCommand(channel, layer, imagePath, shouldLoop)
       : `PLAY ${channel}-${layer} [HTML] "${assetUrl}"`
   );
 
