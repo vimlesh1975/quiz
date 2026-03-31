@@ -1,4 +1,5 @@
 import GalleryClient from "./components/gallery-client";
+import GlobalStopButton from "./components/global-stop-button";
 import styles from "./page.module.css";
 import { getQuizImages, getScoreImages, getVideoAssets } from "@/lib/quiz-images";
 
@@ -51,13 +52,13 @@ export default async function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <GlobalStopButton layers={[10, 11]} />
         <div className={styles.galleryColumns}>
           <div className={styles.scrollColumn}>
             <GalleryClient
               title="Gallery - All Images"
               images={quizImages}
               refreshLabel="Refresh Gallery"
-              stopLayers={[10, 11]}
             />
           </div>
           <div className={styles.scrollColumn}>
@@ -65,7 +66,6 @@ export default async function Home() {
               title="Score - All Images"
               images={scoreImages}
               refreshLabel="Refresh Scores"
-              stopLayers={[10, 11]}
               overlayConfigByImage={scoreOverlayConfigByImage}
             />
           </div>
@@ -74,7 +74,6 @@ export default async function Home() {
               title="Video - All Files"
               images={videoAssets}
               refreshLabel="Refresh Videos"
-              stopLayers={[10, 11]}
             />
           </div>
         </div>

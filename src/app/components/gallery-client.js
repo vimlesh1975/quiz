@@ -10,7 +10,6 @@ export default function GalleryClient({
   title,
   images,
   refreshLabel,
-  stopLayers,
   overlayConfigByImage,
 }) {
   const router = useRouter();
@@ -19,7 +18,6 @@ export default function GalleryClient({
   const [statusMessage, setStatusMessage] = useState("");
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, startRefreshTransition] = useTransition();
-  const [isStopping, startStopTransition] = useTransition();
   const [scoreValues, setScoreValues] = useState(() =>
     createScoreValues(images, overlayConfigByImage)
   );
@@ -105,35 +103,6 @@ export default function GalleryClient({
     });
   }
 
-  function handleStop() {
-    startStopTransition(async () => {
-      setStatusImagePath(null);
-      setStatusMessage("");
-
-      try {
-        const response = await fetch("/api/casparcg/stop", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            layers: stopLayers,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || "Failed to stop CasparCG layers.");
-        }
-
-        setActiveImagePath(null);
-      } catch (error) {
-        setStatusMessage(error.message);
-      }
-    });
-  }
-
   function renderAssetPreview(image, index, filename) {
     if (image.endsWith(".html") || image.endsWith(".htm")) {
       return (
@@ -194,16 +163,6 @@ export default function GalleryClient({
             <div key={image} className={styles.imageContainer}>
               <div className={styles.imageTitleRow}>
                 <h3 className={styles.imageTitle}>{filename}</h3>
-                {index === 0 && stopLayers?.length ? (
-                  <button
-                    type="button"
-                    className={styles.stopButton}
-                    onClick={handleStop}
-                    disabled={isStopping}
-                  >
-                    {isStopping ? "Stopping..." : "Stop"}
-                  </button>
-                ) : null}
               </div>
               <div className={styles.imageRow}>
                 {renderAssetPreview(image, index, filename)}
