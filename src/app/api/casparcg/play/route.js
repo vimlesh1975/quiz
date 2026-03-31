@@ -127,6 +127,7 @@ export async function POST(request) {
       ? body.overlayValues
       : null;
   const overlayType = typeof body?.overlayType === "string" ? body.overlayType : "";
+  const stopLayers = Array.isArray(body?.stopLayers) ? body.stopLayers : [];
 
   if (!imagePath || !isAllowedAsset(imagePath)) {
     return Response.json(
@@ -156,11 +157,16 @@ export async function POST(request) {
   const assetUrl = isVideoAsset
     ? getAssetAbsolutePath(imagePath)?.replaceAll("\\", "/").replace(":/", "://")
     : buildAssetUrl(imagePath, renderBaseUrl);
-  const commands = [
+  const commands = stopLayers
+    .map((stopLayer) => parsePositiveNumber(stopLayer, 0))
+    .filter((stopLayer) => stopLayer > 0)
+    .map((stopLayer) => `STOP ${channel}-${stopLayer}`);
+
+  commands.push(
     isVideoAsset
       ? buildVideoCommand(channel, layer, imagePath)
-      : `PLAY ${channel}-${layer} [HTML] "${assetUrl}"`,
-  ];
+      : `PLAY ${channel}-${layer} [HTML] "${assetUrl}"`
+  );
 
   if (overlayPath) {
     const overlayLayer = parsePositiveNumber(

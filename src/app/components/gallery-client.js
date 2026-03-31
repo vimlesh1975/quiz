@@ -13,6 +13,7 @@ export default function GalleryClient({
   overlayConfigByImage,
   activeImagePath,
   onActiveImageChange,
+  stopLayersOnPlay,
 }) {
   const router = useRouter();
   const [statusImagePath, setStatusImagePath] = useState(null);
@@ -81,6 +82,7 @@ export default function GalleryClient({
           },
           body: JSON.stringify({
             imagePath,
+            stopLayers: stopLayersOnPlay,
             overlayPath: overlayConfig?.overlayPath,
             overlayLayer: overlayConfig?.overlayLayer,
             overlayValue: overlayConfig?.mode === "single" ? overlayValues.value ?? "" : undefined,

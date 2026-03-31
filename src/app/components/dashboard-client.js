@@ -27,6 +27,7 @@ export default function DashboardClient({
             refreshLabel="Refresh Gallery"
             activeImagePath={activeImagePath}
             onActiveImageChange={setActiveImagePath}
+            stopLayersOnPlay={[11]}
           />
         </div>
         <div className={styles.scrollColumn}>
@@ -46,6 +47,7 @@ export default function DashboardClient({
             refreshLabel="Refresh Videos"
             activeImagePath={activeImagePath}
             onActiveImageChange={setActiveImagePath}
+            stopLayersOnPlay={[11]}
           />
         </div>
       </div>
