@@ -24,7 +24,6 @@ export default function DashboardClient({
           <GalleryClient
             title="Gallery - All Images"
             images={quizImages}
-            refreshLabel="Refresh Gallery"
             activeImagePath={activeImagePath}
             onActiveImageChange={setActiveImagePath}
             stopLayersOnPlay={[11]}
@@ -34,7 +33,6 @@ export default function DashboardClient({
           <GalleryClient
             title="Score - All Images"
             images={scoreImages}
-            refreshLabel="Refresh Scores"
             overlayConfigByImage={scoreOverlayConfigByImage}
             activeImagePath={activeImagePath}
             onActiveImageChange={setActiveImagePath}
@@ -44,7 +42,6 @@ export default function DashboardClient({
           <GalleryClient
             title="Video - All Files"
             images={videoAssets}
-            refreshLabel="Refresh Videos"
             activeImagePath={activeImagePath}
             onActiveImageChange={setActiveImagePath}
             stopLayersOnPlay={[11]}

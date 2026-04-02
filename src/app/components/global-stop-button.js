@@ -1,11 +1,14 @@
 'use client'
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import styles from "../page.module.css";
 
 export default function GlobalStopButton({ layers, onStopped }) {
+  const router = useRouter();
   const [message, setMessage] = useState("");
   const [isStopping, startTransition] = useTransition();
+  const [isRefreshing, startRefreshTransition] = useTransition();
 
   function handleStop() {
     startTransition(async () => {
@@ -34,6 +37,13 @@ export default function GlobalStopButton({ layers, onStopped }) {
     });
   }
 
+  function handleRefresh() {
+    startRefreshTransition(() => {
+      setMessage("");
+      router.refresh();
+    });
+  }
+
   return (
     <div className={styles.topBar}>
       <div className={styles.topBarSide}>
@@ -41,6 +51,14 @@ export default function GlobalStopButton({ layers, onStopped }) {
       </div>
       <h1 className={styles.topBarTitle}>DD Chennai Quiz Graphics</h1>
       <div className={styles.topBarSideRight}>
+        <button
+          type="button"
+          className={styles.refreshButton}
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          {isRefreshing ? "Refreshing..." : "Refresh"}
+        </button>
         <button
           type="button"
           className={styles.stopButton}

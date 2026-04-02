@@ -1,15 +1,36 @@
 'use client'
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import CasparShowButton from "./caspar-show-button";
 import styles from "../page.module.css";
+
+function createRandomScore() {
+  return String(180 + Math.floor(Math.random() * 41));
+}
+
+function createScoreValues(nextImages, nextOverlayConfigByImage) {
+  return Object.fromEntries(
+    nextImages.map((image) => {
+      const overlayConfig = nextOverlayConfigByImage?.[image];
+
+      if (!overlayConfig?.inputs?.length) {
+        return [image, {}];
+      }
+
+      return [
+        image,
+        Object.fromEntries(
+          overlayConfig.inputs.map((input) => [input.key, createRandomScore()])
+        ),
+      ];
+    })
+  );
+}
 
 export default function GalleryClient({
   title,
   images,
-  refreshLabel,
   overlayConfigByImage,
   activeImagePath,
   onActiveImageChange,
@@ -17,48 +38,30 @@ export default function GalleryClient({
   showLoopToggle,
   showChannel2Toggle,
 }) {
-  const router = useRouter();
   const [statusImagePath, setStatusImagePath] = useState(null);
   const [statusMessage, setStatusMessage] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [isRefreshing, startRefreshTransition] = useTransition();
   const [shouldLoop, setShouldLoop] = useState(true);
   const [useChannel2, setUseChannel2] = useState(false);
   const [scoreValues, setScoreValues] = useState(() =>
     createScoreValues(images, overlayConfigByImage)
   );
 
-  function createRandomScore() {
-    return String(180 + Math.floor(Math.random() * 41));
-  }
+  useEffect(() => {
+    setScoreValues((currentValues) => {
+      const nextValues = createScoreValues(images, overlayConfigByImage);
 
-  function createScoreValues(nextImages, nextOverlayConfigByImage) {
-    return Object.fromEntries(
-      nextImages.map((image) => {
-        const overlayConfig = nextOverlayConfigByImage?.[image];
-
-        if (!overlayConfig?.inputs?.length) {
-          return [image, {}];
-        }
-
-        return [
-          image,
-          Object.fromEntries(
-            overlayConfig.inputs.map((input) => [input.key, createRandomScore()])
-          ),
-        ];
-      })
-    );
-  }
-
-  function handleRefresh() {
-    startRefreshTransition(() => {
-      setStatusImagePath(null);
-      setStatusMessage("");
-      setScoreValues(createScoreValues(images, overlayConfigByImage));
-      router.refresh();
+      return Object.fromEntries(
+        Object.entries(nextValues).map(([imagePath, initialValues]) => [
+          imagePath,
+          {
+            ...initialValues,
+            ...currentValues[imagePath],
+          },
+        ])
+      );
     });
-  }
+  }, [images, overlayConfigByImage]);
 
   function handleScoreChange(imagePath, inputKey, value) {
     setScoreValues((currentValues) => ({
@@ -174,14 +177,6 @@ export default function GalleryClient({
               <span>ch2</span>
             </label>
           ) : null}
-          <button
-            type="button"
-            className={styles.refreshButton}
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? "Refreshing..." : refreshLabel}
-          </button>
         </div>
       </div>
       <div className={styles.gallery}>
