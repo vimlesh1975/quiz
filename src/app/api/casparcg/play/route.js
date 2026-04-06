@@ -15,6 +15,7 @@ const DEFAULT_SCORE_OVERLAY_LAYER = Number(process.env.CASPARCG_SCORE_OVERLAY_LA
 const DEFAULT_SCORE_OVERLAY_DELAY_MS = Number(
   process.env.CASPARCG_SCORE_OVERLAY_DELAY_MS || "400"
 );
+const DEFAULT_MIX_DURATION = Number(process.env.CASPARCG_MIX_DURATION || "10");
 
 function parsePositiveNumber(value, fallback) {
   const parsed = Number(value);
@@ -28,7 +29,26 @@ function getRenderBaseUrl(request) {
     return configuredBaseUrl;
   }
 
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const hostHeader = forwardedHost || request.headers.get("host");
+
+  if (hostHeader) {
+    const protocol = forwardedProto || "http";
+    const normalizedHost = hostHeader
+      .replaceAll("[::]", "127.0.0.1")
+      .replaceAll("0.0.0.0", "127.0.0.1")
+      .replaceAll("::1", "127.0.0.1");
+
+    return `${protocol}://${normalizedHost}`;
+  }
+
   const requestUrl = new URL(request.url);
+
+  if (["0.0.0.0", "::", "[::]", "::1"].includes(requestUrl.hostname)) {
+    requestUrl.hostname = "127.0.0.1";
+  }
+
   return requestUrl.origin;
 }
 
@@ -58,7 +78,7 @@ function buildVideoCommand(channel, layer, assetPath, shouldLoop) {
   }
 
   const casparPath = absoluteAssetPath.replaceAll("\\", "/").replace(":/", "://");
-  return `PLAY ${channel}-${layer} "${casparPath}"${shouldLoop ? " LOOP" : ""}`;
+  return `PLAY ${channel}-${layer} "${casparPath}"${shouldLoop ? " LOOP" : ""} MIX ${DEFAULT_MIX_DURATION}`;
 }
 
 function sendAmcpCommand(command, host, port) {
@@ -177,7 +197,7 @@ export async function POST(request) {
   commands.push(
     isVideoAsset
       ? buildVideoCommand(channel, layer, imagePath, shouldLoop)
-      : `PLAY ${channel}-${layer} [HTML] "${assetUrl}"`
+      : `PLAY ${channel}-${layer} [HTML] "${assetUrl}" MIX ${DEFAULT_MIX_DURATION}`
   );
 
   if (overlayPath) {
@@ -205,7 +225,9 @@ export async function POST(request) {
             renderBaseUrl
           ).toString()
         : buildAssetUrl(overlayPath, renderBaseUrl);
-    commands.push(`PLAY ${channel}-${overlayLayer} [HTML] "${overlayUrl}"`);
+    commands.push(
+      `PLAY ${channel}-${overlayLayer} [HTML] "${overlayUrl}" MIX ${DEFAULT_MIX_DURATION}`
+    );
   }
 
   try {
